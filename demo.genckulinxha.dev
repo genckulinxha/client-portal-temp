@@ -1,0 +1,107 @@
+# Nginx configuration for demo.genckulinxha.dev
+# Client Portal - Laravel Application with Filament Admin
+
+# HTTP Server Configuration (temporary - will be updated by Certbot)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name demo.genckulinxha.dev;
+
+    # Root directory for static files
+    root /opt/client-portal/public;
+
+    # Logging
+    access_log /var/log/nginx/demo.genckulinxha.dev.access.log;
+    error_log /var/log/nginx/demo.genckulinxha.dev.error.log;
+
+    # Gzip Compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied expired no-cache no-store private;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/xml+rss
+        application/json
+        image/svg+xml;
+
+    # Client max body size for file uploads
+    client_max_body_size 100M;
+
+    # Handle Laravel routing
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # PHP processing
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        
+        # Additional FastCGI params
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param HTTP_AUTHORIZATION $http_authorization;
+    }
+
+    # Vite Dev Server (for development - remove in production)
+    location /vite/ {
+        proxy_pass http://127.0.0.1:5173/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # WebSocket support for Vite HMR
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Static assets optimization
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Vary Accept-Encoding;
+        
+        # Try to serve file directly, fallback to index.php
+        try_files $uri =404;
+    }
+
+    # Security: Block access to sensitive files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    location ~ ^/(\.env|composer\.(json|lock)|package\.(json|lock)|docker-compose\.yml|Dockerfile)$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Health check endpoint
+    location /nginx-health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Laravel specific locations
+    location /storage {
+        alias /opt/client-portal/storage/app/public;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Admin panel specific headers
+    location /admin {
+        add_header X-Robots-Tag "noindex, nofollow" always;
+    }
+} 

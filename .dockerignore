@@ -1,0 +1,81 @@
+# Git
+.git
+.gitignore
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Development files
+.env.local
+.env.testing
+
+# Node modules (handled by volume)
+node_modules/
+node_modules 2/
+
+# Vendor directory (built in container)
+vendor/
+
+# Storage (handled by volume)
+storage/app/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/testing/
+storage/framework/views/
+storage/logs/
+storage/debugbar/
+
+# Build artifacts
+public/hot
+public/build/
+public/mix-manifest.json
+public/css/
+public/js/
+bootstrap/cache/*
+!bootstrap/cache/.gitkeep
+
+# Cache and temp files
+.cache
+.npm
+.phpunit.cache
+.phpunit.result.cache
+_ide_helper.php
+_ide_helper_models.php
+
+# Large files
+*.log
+*.sql
+*.sqlite-journal
+*.tmp
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Compiled assets
+dist/
+build/ 
